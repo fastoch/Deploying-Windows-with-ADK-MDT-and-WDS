@@ -39,9 +39,26 @@ Often, MDT and WDS are **used together** for full deployment solutions, where MD
 
 # Configuring an automated deployment ecosystem
 
+- setting up the VMs via VMware Workstation or a similar tool
 - setting up the WDS server 
 - setting up the DHCP server (to allow PXE boot in both UEFI and BIOS modes)
 - setting up ADK and MDT
+
+## Setting up our Virtual Windows servers
+
+We can use a tool like VMware Workstation to create our VMs.
+- Once we have set up the ADDS (domain controller) server, we need to add the DHCP role to it.  
+- After that, we need to set up a dedicated Windows Server VM with the WDS role
+- The WDS server then needs to be joined to our AD domain
+- It's **recommended** to create an NTFS partition on our WDS server. That partition will host our images, PXE boot files and other WDS-related files.
+- We also need 2 PXE clients (W10 and W11) to test our PXE boot
+  - For the Windows 10 client, we can modify the VM settings to test both BIOS and UEFI (with secure boot enabled or not)
+  - For the Windows 11 client, we don't have a choice but to use UEFI (with secure boot enabled or not)
+
+The IP addresses of our VMs can be 192.168.16.10 and 16.11 and 16.12, for example. They just need to be part of the same network.  
+
+**Note**:  
+Of course, our client VMs don't have any OS installed yet, we've just specified the future OS when creating the VMs via VMware Workstation.
 
 ## Setting up the WDS server
 
@@ -76,27 +93,28 @@ This is true for deploying Windows 10 images, but **Windows 11** requires to use
 
 ## Setting up the DHCP server
 
-- This is an Active Directory (AD) Domain Controller (DC) to which we've added the DHCP role.  
-- This VM is also running Windows Server 2022
+### Prerequisite: ADDS + DNS
 
-## Setting up our Virtual Windows servers
-
-We can use a tool like VMware Workstation to create our VMs.
-- Once we have set up the ADDS (domain controller) server, we need to add the DHCP role to it.  
-- After that, we need to set up a dedicated Windows Server VM with the WDS role
-- The WDS server then needs to be joined to our AD domain
-- We also need 2 PXE clients (W10 and W11) to test our PXE boot
-  - For the Windows 10 client, we can modify the VM settings to test both BIOS and UEFI (with secure boot enabled or not)
-  - For the Windows 11 client, we don't have a choice but to use UEFI (with secure boot enabled or not)
-
-The IP addresses of our VMs can be 192.168.16.10 and 16.11 and 16.12, for example. They just need to be part of the same network.  
+-  This VM will be running Windows Server 2022
+-  
 
 **Note**:  
-Of course, our client VMs don't have any OS installed yet, we've just specified the future OS when creating the VMs via VMware Workstation.
+When creating an Active Directory Domain Services (ADDS) server, the DNS Server role is not automatically installed by default.  
+But the AD DS installation wizard offers the option to automatically install and configure the DNS server.  
+This automatic addition and configuration happen during the **promotion** of the server to a **domain controller**.  
+The DNS zones created during this process are integrated with the AD DS domain namespace.
+
+### Adding the DHCP role
+
+- We now have an Active Directory (AD) Domain Controller (DC) to which we're going to add the DHCP role.  
+-
+
+
 
 ---
 **sources**:  
 - https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
 - https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
 
-@9/22 (video 1/2)
+@9/22 (video 1/2)  
+@0/37 (video 2/2)
