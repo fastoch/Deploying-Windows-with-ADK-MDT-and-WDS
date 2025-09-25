@@ -43,7 +43,7 @@ Often, MDT and WDS are **used together** for full deployment solutions, where MD
 - setting up the DHCP server (to allow PXE boot in both UEFI and BIOS modes)
 - setting up ADK and MDT
 
-## The WDS server
+## Setting up the WDS server
 
 - WDS needs a **DHCP** server so it can deliver images via **PXE boot**
 - A WDS server can either be independent (workgroup) or registered in an Active Directory domain
@@ -56,9 +56,28 @@ When a machine runs a PXE boot, its firmware uses one of these 2 modes:
 **Note**:  
 This is true for deploying Windows 10 images, but **Windows 11** requires to use **UEFI** to align with the **TPM 2.0** prerequisites.  
 
-## The DHCP server
+### Installing the WDS role on our WDS VM
 
-This will be an Active Directory (AD) Domain Controller (DC) to which we'll add the DHCP role.  
+- The VM is running Windows Server 2022 and has been joined to the AD domain provided by our ADDS/DHCP VM
+- Open "Server Manager"
+- Click on "Manage" and select "Add Roles and Features"
+- Choose "Role-based or feature-based installation"
+- Select the server where you want to install the role 
+- In the list of roles, check "Windows Deployment Services"
+- Click on Next until the Role Services selection
+- Ensure both role services are selected: Deployment Server and Transport Server
+- Click on "Install"
+
+### Configuring WDS
+
+- once the WDS role installed, open the Windows Deployment Services console
+- in the left pane, open the servers section and right-click on the WDS server > Configure server
+- 
+
+## Setting up the DHCP server
+
+- This is an Active Directory (AD) Domain Controller (DC) to which we've added the DHCP role.  
+- This VM is also running Windows Server 2022
 
 ## Setting up our Virtual Windows servers
 
@@ -73,4 +92,11 @@ We can use a tool like VMware Workstation to create our VMs.
 The IP addresses of our VMs can be 192.168.16.10 and 16.11 and 16.12, for example. They just need to be part of the same network.  
 
 **Note**:  
-Of course, our client VMs don't have any OS installed yet, we've just specified the future OS when creating the VM via VMware Workstation.
+Of course, our client VMs don't have any OS installed yet, we've just specified the future OS when creating the VMs via VMware Workstation.
+
+---
+**sources**:  
+- https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
+- https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
+
+@9/22 (video 1/2)
