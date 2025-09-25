@@ -21,6 +21,10 @@ MDT is designed for medium to large enterprises to reduce deployment time, ensur
 WDS (**Windows Deployment Services**) is a **network-based** deployment server role in Windows Server.  
 
 It enables the deployment of Windows OS images over the network using **PXE boot** technology.  
+PXE stands for **Preboot Execution Environment**, and relies on DHCP for IP addressing.  
+
+**Reminder**:  
+DHCP is what assigns an IP address to the clients and provides them with the information needed to locate the PXE server.  
 
 WDS is primarily responsible for hosting and delivering boot and install images to client machines.  
 It is simpler than MDT and requires pre-built images, often created via **MDT** or other tools.  
@@ -33,7 +37,7 @@ WDS can deploy images to multiple machines simultaneously but lacks MDT’s exte
 - MDT automates and orchestrates deployment workflows using ADK tools
 - WDS handles network-based image delivery to client devices.
 
-Often, MDT and WDS are **used together** for full deployment solutions, where MDT creates and customizes the deployment images and task sequences, while WDS delivers them over the network.
+Often, **MDT** and **WDS** are **used together** for full deployment solutions, where MDT creates and customizes the deployment images and task sequences, while WDS delivers them over the network.
 
 ---
 
@@ -50,15 +54,21 @@ We can use a tool like VMware Workstation to create our VMs.
 - Once we have set up the ADDS (domain controller) server, we need to add the DHCP role to it.  
 - After that, we need to set up a dedicated Windows Server VM with the WDS role
 - The WDS server then needs to be joined to our AD domain
-- It's **recommended** to create an NTFS partition on our WDS server. That partition will host our images, PXE boot files and other WDS-related files.
+- It's **recommended** to create an **NTFS partition** on our WDS server.
+  - That partition will host our images, PXE boot files and other WDS-related files.
 - We also need 2 PXE clients (W10 and W11) to test our PXE boot
   - For the Windows 10 client, we can modify the VM settings to test both BIOS and UEFI (with secure boot enabled or not)
   - For the Windows 11 client, we don't have a choice but to use UEFI (with secure boot enabled or not)
+ 
+**Note**:  
+Of course, our client VMs don't have any OS installed yet, we've just specified the future OS when creating the VMs via VMware Workstation.
+
+## Networking side note
 
 The IP addresses of our VMs can be 192.168.16.10 and 16.11 and 16.12, for example. They just need to be part of the same network.  
 
-**Note**:  
-Of course, our client VMs don't have any OS installed yet, we've just specified the future OS when creating the VMs via VMware Workstation.
+And if in real life, our servers are in a different network from the machines to be deployed (different VLANs, for example), we must declare the IP address of 
+the DHCP server and the WDS server in the DHCP relay options of our gateway (router/firewall).
 
 ## Setting up the WDS server
 
@@ -88,8 +98,27 @@ This is true for deploying Windows 10 images, but **Windows 11** requires to use
 ### Configuring WDS
 
 - once the WDS role installed, open the Windows Deployment Services console
-- in the left pane, open the servers section and right-click on the WDS server > Configure server
-- 
+- in the left pane, open the Servers section and right-click on the WDS server > Configure server
+- we get reminded that we need a DHCP server and a DNS server active on our network, along with an NTFS partition to store images
+- in our example, the WDS is not independent and is part of an AD DS domain
+- then we need to specify the path to the remote installation folder (inside the NTFS partition, this is where we'll store our images)
+  - we can name this folder "RemoteInstall", in which case the path will look like "W:\RemoteInstall"
+- We need to specify which clients our WDS server will respond: choose "respond to all clients"
+- the WDS config is over, we can uncheck "add images to the server now" before clicking on "Finish"
+
+In the left pane, we now have new "folders": installation images, boot images, pending devices, drivers, etc.
+
+### Note about boot images
+
+- we need to load an ISO image of W10 or W11
+- we can deploy W10 images via WDS, so we just need to load a W10 ISO in our WDS VM (removable devices > CD/DVD > Connect)
+- but keep in mind that we cannot deploy W11 images only via WDS, we need to combine WDS with MDT (more on that in video #2)
+- once we've loaded a W10 ISO in our WDS VM, we need to go back to the WDS console and right-click on "boot images" to add a boot image
+  - browse to the virtual DVD drive > "sources" folder > boot.wim
+  - name the image as you wish
+- same process to add an installation image with a right-click on "installation images"
+  - this time, select the install.wim file
+  - specify which OS versions you want to add to the server
 
 ## Setting up the DHCP server
 
@@ -98,7 +127,8 @@ This is true for deploying Windows 10 images, but **Windows 11** requires to use
 -  This VM will be running Windows Server 2022
 -  
 
-**Note**:  
+### DNS side note
+
 When creating an Active Directory Domain Services (ADDS) server, the DNS Server role is not automatically installed by default.  
 But the AD DS installation wizard offers the option to automatically install and configure the DNS server.  
 This automatic addition and configuration happen during the **promotion** of the server to a **domain controller**.  
@@ -113,8 +143,8 @@ The DNS zones created during this process are integrated with the AD DS domain n
 
 ---
 **sources**:  
-- https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
-- https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
+- video #1: https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
+- video #2: https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
 
-@9/22 (video 1/2)  
+@12/22 (video 1/2)  
 @0/37 (video 2/2)
