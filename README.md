@@ -158,7 +158,7 @@ The DNS zones created during this process are integrated with the AD DS domain n
 **Documentation**:  
 https://learn.microsoft.com/en-us/windows-server/networking/dns/quickstart-install-configure-dns-server?tabs=gui
 
-### Configuring the DHCP role
+### Configuring the DHCP role for PXE boot in BIOS mode
 
 - We now have an Active Directory (AD) Domain Controller (DC) to which we must add the DHCP role.  
 - Once the DHCP role has been added, we need to create a new IPv4 scope
@@ -183,12 +183,34 @@ Our DHCP server is now ready for running PXE boots in BIOS mode.
 We can easily test that by:
 - going to our W10 client VM,
 - checking the VM advanced settings > Firmware type must be set to BIOS
-- starting the VM and make sure that it sees the WDS server and can load the boot.wim image 
+- starting the VM and making sure that it sees the WDS server and can load the boot.wim image
+- once the W10 installation wizard starts, we can consider that the PXE boot is working 
+
+### Configuring the DHCP role for PXE boot in both UEFI & BIOS modes
+
+- in the DHCP console, go back to the "Deployments" scope options and remove options 66 and 67
+- to add the option 60, we need to run the following cmd in powershell:
+  ```
+  Add-DhcpServerv4OptionDefinition -ComputerName SRV-ADDS-01 -Name PXEClient -Description "PXE Support" -OptionId 060 -Type String
+  ```
+  Of course, replace SRV-ADDS-01 with your actual ADDS/DHCP server name
+- go back to the DHCP console, click on Scope options under the "Deployments" scope
+- and you should now see option 60
+
+These vendor classes will allow our DHCP server to identify the DHCP client and determine whether they use BIOS or UEFI.  
+Which will then allow our DHCP server to choose the right strategy for the PXE boot.
+
+To define our vendor classes, we will run the following powershell script:
+```
+
+```
 
 ---
 **sources**:  
 - video #1: https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
+- tuto #1: https://www.it-connect.fr/serveurs-dhcp-wds-boot-pxe-bios-et-uefi/
 - video #2: https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
+- tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
-@15/22 (video 1/2)  
+@17/22 (video 1/2)  
 @0/37 (video 2/2)
