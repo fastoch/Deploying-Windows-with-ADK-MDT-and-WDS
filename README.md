@@ -163,7 +163,7 @@ https://learn.microsoft.com/en-us/windows-server/networking/dns/quickstart-insta
 - We now have an Active Directory (AD) Domain Controller (DC) to which we must add the DHCP role.  
 - Once the DHCP role has been added, we need to create a new IPv4 scope
 - For that, open the "DHCP" console > right-click on IPv4 > new IP scope
-  - name this IP range "Deployments"
+  - name this IP scope "Deployments"
   - the scope could go from 192.168.16.100 to 192.168.16.128 (with a /24 subnet mask, which is 255.255.255.0)
   - no need to add any exclusion or delay
   - the lease term can be set to 4 hours (enough to deploy the OS on the client machine)
@@ -219,29 +219,32 @@ Add-DhcpServerv4Class -ComputerName $DhcpServerName -Name "PXEClient - UEFI x64"
 Add-DhcpServerv4Class -ComputerName $DhcpServerName -Name "PXEClient - UEFI x86" -Type Vendor -Data "PXEClient:Arch:00006" -Description "PXEClient:Arch:00006"
 Add-DhcpServerv4Class -ComputerName $DhcpServerName -Name "PXEClient - BIOS x86 et x64" -Type Vendor -Data "PXEClient:Arch:00000" -Description "PXEClient:Arch:00000"
 
-# Now, we need to define strategies for each of our 3 vendor classes, which we'll also do via our powershell script:
+# Now, we need to define policies for each of our 3 vendor classes, which we'll also do via our powershell script:
 
-# First strategy
+# First policy
 $PolicyNameBIOS = "PXEClient - BIOS x86 et x64"
 Add-DhcpServerv4Policy -Computername $DhcpServerName -ScopeId $Scope -Name $PolicyNameBIOS -Description "Options DHCP pour boot BIOS x86 et x64" -Condition Or -VendorClass EQ, "PXEClient - BIOS x86 et x64*"
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 066 -Value $PxeServerIp -PolicyName $PolicyNameBIOS
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 067 -Value boot\x64\wdsnbp.com -PolicyName $PolicyNameBIOS
 
-# Second strategy
+# Second policy
 $PolicyNameUEFIx86 = "PXEClient - UEFI x86"
 Add-DhcpServerv4Policy -Computername $DhcpServerName -ScopeId $Scope -Name $PolicyNameUEFIx86 -Description "Options DHCP pour boot UEFI x86" -Condition Or -VendorClass EQ, "PXEClient - UEFI x86*"
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 060 -Value PXEClient -PolicyName $PolicyNameUEFIx86
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 066 -Value $PxeServerIp -PolicyName $PolicyNameUEFIx86
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 067 -Value boot\x86\wdsmgfw.efi -PolicyName $PolicyNameUEFIx86
 
-# Third strategy
+# Third policy
 $PolicyNameUEFIx64 = "PXEClient - UEFI x64"
 Add-DhcpServerv4Policy -Computername $DhcpServerName -ScopeId $Scope -Name $PolicyNameUEFIx64 -Description "Options DHCP pour boot UEFI x64" -Condition Or -VendorClass EQ, "PXEClient - UEFI x64*"
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 060 -Value PXEClient -PolicyName $PolicyNameUEFIx64
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 066 -Value $PxeServerIp -PolicyName $PolicyNameUEFIx64
 Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 067 -Value boot\x64\wdsmgfw.efi -PolicyName $PolicyNameUEFIx64
 ```
-  
+
+In the DHCP console, if we right-click on IPv4 and click on "define vendor classes", we should now see our 3 classes.  
+Same thing if we go to our IPv4 scope and click on "Policies": we should see the 3 policies we've just defined.
+
 ---
 **sources**:  
 - video #1: https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
@@ -249,5 +252,5 @@ Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -Optio
 - video #2: https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
-@17/22 (video 1/2)  
+@19/22 (video 1/2)  
 @0/37 (video 2/2)
