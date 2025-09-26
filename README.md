@@ -188,6 +188,8 @@ We can easily test that by:
 
 ### Configuring the DHCP role for PXE boot in both UEFI & BIOS modes
 
+Option 60 is known as the Vendor Class Identifier (VCI). It is used mainly in PXE (Preboot Execution Environment) boot scenarios to identify the client type to the DHCP server.
+
 - in the DHCP console, go back to the "Deployments" scope options and remove options 66 and 67
 - to add the option 60, we need to run the following cmd in powershell:
   ```
@@ -197,14 +199,49 @@ We can easily test that by:
 - go back to the DHCP console, click on Scope options under the "Deployments" scope
 - and you should now see option 60
 
-These vendor classes will allow our DHCP server to identify the DHCP client and determine whether they use BIOS or UEFI.  
-Which will then allow our DHCP server to choose the right strategy for the PXE boot.
+After that, we need to declare 3 vendor classes.  
+These vendor classes will allow our DHCP server to identify the PXE client and to determine whether it's using BIOS or UEFI.  
 
 To define our vendor classes, we will run the following powershell script:
 ```
+# Let's start by defining 3 variables that we will use multiple times in our script:
 
+# DHCP server hostname
+$DhcpServerName = "SRV-ADDS-01"
+# WDS (PXE) server IP address
+$PxeServerIp = "192.168.16.11"
+# Network address of the targeted DHCP scope
+$Scope = "192.168.16.0"
+
+# Defining the 3 DHCP vendor classes we'll need to cover all use cases:
+
+Add-DhcpServerv4Class -ComputerName $DhcpServerName -Name "PXEClient - UEFI x64" -Type Vendor -Data "PXEClient:Arch:00007" -Description "PXEClient:Arch:00007"
+Add-DhcpServerv4Class -ComputerName $DhcpServerName -Name "PXEClient - UEFI x86" -Type Vendor -Data "PXEClient:Arch:00006" -Description "PXEClient:Arch:00006"
+Add-DhcpServerv4Class -ComputerName $DhcpServerName -Name "PXEClient - BIOS x86 et x64" -Type Vendor -Data "PXEClient:Arch:00000" -Description "PXEClient:Arch:00000"
+
+# Now, we need to define strategies for each of our 3 vendor classes, which we'll also do via our powershell script:
+
+# First strategy
+$PolicyNameBIOS = "PXEClient - BIOS x86 et x64"
+Add-DhcpServerv4Policy -Computername $DhcpServerName -ScopeId $Scope -Name $PolicyNameBIOS -Description "Options DHCP pour boot BIOS x86 et x64" -Condition Or -VendorClass EQ, "PXEClient - BIOS x86 et x64*"
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 066 -Value $PxeServerIp -PolicyName $PolicyNameBIOS
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 067 -Value boot\x64\wdsnbp.com -PolicyName $PolicyNameBIOS
+
+# Second strategy
+$PolicyNameUEFIx86 = "PXEClient - UEFI x86"
+Add-DhcpServerv4Policy -Computername $DhcpServerName -ScopeId $Scope -Name $PolicyNameUEFIx86 -Description "Options DHCP pour boot UEFI x86" -Condition Or -VendorClass EQ, "PXEClient - UEFI x86*"
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 060 -Value PXEClient -PolicyName $PolicyNameUEFIx86
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 066 -Value $PxeServerIp -PolicyName $PolicyNameUEFIx86
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 067 -Value boot\x86\wdsmgfw.efi -PolicyName $PolicyNameUEFIx86
+
+# Third strategy
+$PolicyNameUEFIx64 = "PXEClient - UEFI x64"
+Add-DhcpServerv4Policy -Computername $DhcpServerName -ScopeId $Scope -Name $PolicyNameUEFIx64 -Description "Options DHCP pour boot UEFI x64" -Condition Or -VendorClass EQ, "PXEClient - UEFI x64*"
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 060 -Value PXEClient -PolicyName $PolicyNameUEFIx64
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 066 -Value $PxeServerIp -PolicyName $PolicyNameUEFIx64
+Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -OptionId 067 -Value boot\x64\wdsmgfw.efi -PolicyName $PolicyNameUEFIx64
 ```
-
+  
 ---
 **sources**:  
 - video #1: https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
