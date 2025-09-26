@@ -37,7 +37,9 @@ WDS can deploy images to multiple machines simultaneously but lacks MDT’s exte
 - MDT automates and orchestrates deployment workflows using ADK tools
 - WDS handles network-based image delivery to client devices.
 
-Often, **MDT** and **WDS** are **used together** for full deployment solutions, where MDT creates and customizes the deployment images and task sequences, while WDS delivers them over the network.
+Often, **MDT** and **WDS** are **used together** for full deployment solutions, where:
+- MDT creates and customizes the deployment images and task sequences,
+- while WDS is responsible for delivering them over the network.
 
 ---
 
@@ -53,7 +55,7 @@ Often, **MDT** and **WDS** are **used together** for full deployment solutions, 
 We can use a tool like VMware Workstation to create our VMs.
 - Once we have set up the ADDS (domain controller) server, we need to add the DHCP role to it.  
 - After that, we need to set up a dedicated Windows Server VM with the WDS role
-- The WDS server then needs to be joined to our AD domain
+- The WDS server then needs to be registered to our AD domain
 - It's **recommended** to create an **NTFS partition** on our WDS server.
   - That partition will host our images, PXE boot files and other WDS-related files.
 - We also need 2 PXE clients (W10 and W11) to test our PXE boot
@@ -65,7 +67,11 @@ Of course, our client VMs don't have any OS installed yet, we've just specified 
 
 ## Networking side note
 
-The IP addresses of our VMs can be 192.168.16.10 and 16.11 and 16.12, for example. They just need to be part of the same network.  
+As an example, the IP addresses of our VMs can be: 
+- 192.168.16.10 for the "ADDS DC/DNS/DHCP" server
+- 192.168.16.11 for the WDS server
+- and 192.168.16.12 and 192.168.16.13 for the W10 and W11 clients 
+They just need to be part of the same network.  
 
 And if in real life, our servers are in a different network from the machines to be deployed (different VLANs, for example), we must declare the IP address of 
 the DHCP server and the WDS server in the DHCP relay options of our gateway (router/firewall).
@@ -108,7 +114,7 @@ This is true for deploying Windows 10 images, but **Windows 11** requires to use
 
 In the left pane, we now have new "folders": installation images, boot images, pending devices, drivers, etc.
 
-### Note about boot images
+### Adding boot images & installation images
 
 - we need to load an ISO image of W10 or W11
 - we can deploy W10 images via WDS, so we just need to load a W10 ISO in our WDS VM (removable devices > CD/DVD > Connect)
@@ -120,31 +126,69 @@ In the left pane, we now have new "folders": installation images, boot images, p
   - this time, select the install.wim file
   - specify which OS versions you want to add to the server
 
+Once we've added the installation images to our WDS server, we'll be able to PXE boot from our future Windows PC clients:
+- The client boots from the network (PXE boot)
+- It loads up the boot image (boot.wim)
+- It then starts installing the Windows OS of our choice (install.wim)
+
+### Important note about installation images
+
+When we'll use **MDT**, we won't need to use these installation images anymore.  
+Instead, we'll be relying on the MDT server to deliver the installation images.  
+
 ## Setting up the DHCP server
+
+We need to add the DHCP role and configure it so it can handle both UEFI and BIOS PXE boot.  
+- https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/quickstart-install-configure-dhcp-server?tabs=powershell
+- https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/quickstart-install-configure-dhcp-server?tabs=gui
 
 ### Prerequisite: ADDS + DNS
 
 -  This VM will be running Windows Server 2022
--  
+-  We need to add the AD DS role to this server and then promote it into a domain controller (DC)
+-  Promoting the server to a DC will allow us to install and configure the DNS role 
 
 ### DNS side note
 
 When creating an Active Directory Domain Services (ADDS) server, the DNS Server role is not automatically installed by default.  
 But the AD DS installation wizard offers the option to automatically install and configure the DNS server.  
-This automatic addition and configuration happen during the **promotion** of the server to a **domain controller**.  
-The DNS zones created during this process are integrated with the AD DS domain namespace.
+This automatic addition and configuration happens during the **promotion** of the server to a **domain controller**.  
+The DNS zones created during this process are integrated with the AD DS domain namespace.  
 
-### Adding the DHCP role
+**Documentation**:  
+https://learn.microsoft.com/en-us/windows-server/networking/dns/quickstart-install-configure-dns-server?tabs=gui
 
-- We now have an Active Directory (AD) Domain Controller (DC) to which we're going to add the DHCP role.  
--
+### Configuring the DHCP role
 
+- We now have an Active Directory (AD) Domain Controller (DC) to which we must add the DHCP role.  
+- Once the DHCP role has been added, we need to create a new IPv4 scope
+- For that, open the "DHCP" console > right-click on IPv4 > new IP scope
+  - name this IP range "Deployments"
+  - the scope could go from 192.168.16.100 to 192.168.16.128 (with a /24 subnet mask, which is 255.255.255.0)
+  - no need to add any exclusion or delay
+  - the lease term can be set to 4 hours (enough to deploy the OS on the client machine)
+  - say Yes to configure the DHCP settings right away
+  - specify the default gateway address: for example, 192.168.16.1 in a network with the subnet 192.168.16.0/24
+  - the domain name and the IP address for our DNS server should be automatically detected
+  - no need to use WINS servers
+  - select Yes to enable the new IP scope
+- After creating our new "Deployments" IP scope, we need to go to the "Scope options" section
+- https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/quickstart-install-configure-dhcp-server?tabs=gui#manage-scope-options
+  - from there, right-click > configure options
+  - options 3, 6 and 15 should already be configured (router, DNS servers and DNS domain name)
+  - option 66 needs to be checked and set with the IP of our WDS server (192.168.16.11 in our example)
+  - option 67 needs to be checked and set with the boot file name: boot\x64\wdsnbp.com (WDS network boot program)
 
+Our DHCP server is now ready for running PXE boots in BIOS mode.  
+We can easily test that by:
+- going to our W10 client VM,
+- checking the VM advanced settings > Firmware type must be set to BIOS
+- starting the VM and make sure that it sees the WDS server and can load the boot.wim image 
 
 ---
 **sources**:  
 - video #1: https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
 - video #2: https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
 
-@12/22 (video 1/2)  
+@15/22 (video 1/2)  
 @0/37 (video 2/2)
