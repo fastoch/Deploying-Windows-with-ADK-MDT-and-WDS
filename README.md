@@ -190,7 +190,7 @@ We can easily test that by:
 
 Option 60 is known as the Vendor Class Identifier (VCI). It is used mainly in PXE (Preboot Execution Environment) boot scenarios to identify the client type to the DHCP server.
 
-- in the DHCP console, go back to the "Deployments" scope options and remove options 66 and 67
+- in the DHCP console, let's go back to the "Deployments" scope options and remove options 66 and 67
 - to add the option 60, we need to run the following cmd in powershell:
   ```
   Add-DhcpServerv4OptionDefinition -ComputerName SRV-ADDS-01 -Name PXEClient -Description "PXE Support" -OptionId 060 -Type String
@@ -243,7 +243,13 @@ Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -Optio
 ```
 
 In the DHCP console, if we right-click on IPv4 and click on "define vendor classes", we should now see our 3 classes.  
-Same thing if we go to our IPv4 scope and click on "Policies": we should see the 3 policies we've just defined.
+Same thing if we go to our IPv4 scope and click on "Policies": we should see the 3 policies we've just defined.  
+
+## Testing PXE boot on BIOS and UEFI machines
+
+We can now test PXE boot in different modes by: 
+- modifying the Firmware type in our VM client settings (W10 can be BIOS or UEFI while W11 has to be set to UEFI)
+- and then try to run a PXE boot for each VM to confirm that it is working for both BIOS and UEFI modes
 
 ---
 **sources**:  
@@ -252,5 +258,5 @@ Same thing if we go to our IPv4 scope and click on "Policies": we should see the
 - video #2: https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
-@19/22 (video 1/2)  
+@20/22 (video 1/2)  
 @0/37 (video 2/2)
