@@ -272,9 +272,29 @@ Once we have deployed our MDT server, we'll use the "**Deployment Workbench**" c
 
 To deploy our MDT server, we need to make sure we already have:
 - a WDS server
-- a DHCP server configured to handle PXE boot for both BIOS and UEFI clients
+- a DHCP server configured to handle PXE boot for both BIOS and UEFI clients 
 - an AD domain controller (optional)
 - client machines ready to receive Windows images
+
+In our case, we'll install MDT on our WDS server but this is not mandatory.  
+We could install the Deployment Workbench on a workstation, and have the Deployment share hosted on the WDS server or on a file server.  
+
+### Installing and configuring MDT to deploy W11 
+
+- install Windows ADK for the targeted version of W11
+- install the Windows PE add-on for ADK
+- install the latest version of MDT
+
+Once we have access to the Deployment Workbench console, we have to:
+- create a deployment share repo that will host our images, applications, drivers, etc.
+- create a dedicated user that has read access on this deployment share
+- import the desired image of Windows 11 into the deployment share
+- create a task sequence to deploy that image
+- configure MDT to make it work with W11 
+- customize the deployment environment
+- generate the LiteTouch image and then import it into WDS
+
+
 
 ---
 **sources**:  
@@ -284,4 +304,4 @@ To deploy our MDT server, we need to make sure we already have:
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
 @22/22 (video 1/2)  
-@4/37 (video 2/2)
+@8/37 (video 2/2)
