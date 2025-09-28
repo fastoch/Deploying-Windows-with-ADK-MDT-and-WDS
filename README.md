@@ -292,9 +292,16 @@ Once we have access to the Deployment Workbench console, we have to:
 - create a task sequence to deploy that image
 - configure MDT to make it work with W11 
 - customize the deployment environment
-- generate the LiteTouch image and then import it into WDS
+- generate the LiteTouch image (Windows PE) and then import it into WDS
+- finally, run a PXE boot on the targeted client to try and install W11
 
+### Deploying MDT on our WDS server
 
+- download windows ADK for the specific version of W11 you wish to deploy
+- download the windows PE add-on for ADK for the same version
+- install ADK
+- install windows PE
+- download and install MDT
 
 ---
 **sources**:  
@@ -304,4 +311,4 @@ Once we have access to the Deployment Workbench console, we have to:
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
 @22/22 (video 1/2)  
-@8/37 (video 2/2)
+@10/37 (video 2/2)
