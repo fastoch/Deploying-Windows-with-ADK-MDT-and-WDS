@@ -56,7 +56,7 @@ We can use a tool like VMware Workstation to create our VMs.
 - Once we have set up the ADDS (domain controller) server, we need to add the DHCP role to it.  
 - After that, we need to set up a dedicated Windows Server VM with the WDS role
 - The WDS server then needs to be registered to our AD domain
-- It's **recommended** to create an **NTFS partition** on our WDS server.
+- It's **recommended** to create a dedicated **NTFS partition** on our WDS server.
   - That partition will host our images, PXE boot files and other WDS-related files.
 - We also need 2 PXE clients (W10 and W11) to test our PXE boot
   - For the Windows 10 client, we can modify the VM settings to test both BIOS and UEFI (with secure boot enabled or not)
@@ -277,7 +277,7 @@ To deploy our MDT server, we need to make sure we already have:
 - client machines ready to receive Windows images
 
 In our case, we'll install MDT on our WDS server but this is not mandatory.  
-We could install the Deployment Workbench on a workstation, and have the Deployment share hosted on the WDS server or on a file server.  
+We could install the "Deployment Workbench" component on a workstation, and have the Deployment share hosted on the WDS server or on a file server.  
 
 ### Installing and configuring MDT to deploy W11 
 
@@ -302,6 +302,42 @@ Once we have access to the Deployment Workbench console, we have to:
 - install ADK
 - install windows PE
 - download and install MDT
+- start the Deployment Workbench console
+
+### Configuring MDT
+
+For now, we don't have any deployment shares.  
+- create one by right-clicking the "Deployment Shares" folder in the left pane > new deployment share
+- we can store data for this deployment share in the same partition that we used for WDS (W:\DeploymentShare)
+- once our deployment share has been created, we can create a new local user on the server with read-only permission on the deployment share folder
+
+To create this special user, we'll use the following powershell script:
+```
+# Spécifier le nom et le mot de passe du compte de service
+$ServiceAccountName = "Service_MDT"
+$ServiceAccountPassword = ConvertTo-SecureString "P@ssword123!" -AsPlainText -Force
+
+# Créer le compte local
+New-LocalUser $ServiceAccountName -Password $ServiceAccountPassword -FullName "MDT" -Description "Compte de service pour MDT"
+
+# Ajouter les droits en lecture sur le partage
+Grant-SmbShareAccess -Name "DeploymentShare$" -AccountName "Service_MDT" -AccessRight Read -Force
+
+# Attribuer au compte de service les permissions nécessaires pour accéder aux fichiers de déploiement MDT
+$MDTSharePath = "\\$env:COMPUTERNAME\DeploymentShare$"
+$Acl = Get-Acl $MDTSharePath
+$Rule = New-Object System.Security.AccessControl.FileSystemAccessRule("Service_MDT","ReadAndExecute", "ContainerInherit, ObjectInherit", "None", "Allow")
+$Acl.SetAccessRule($Rule)
+Set-Acl $MDTSharePath $Acl
+```
+
+### Importing a W11 image into our MDT
+
+- download the desired ISO image of W11
+- in the Deployment Workbench console, go to the newly created deployment share
+- right-click on "operating systems" to create a "Windows-11" folder into which we'll be able to import all our W11 images
+- then, right-click on "Windows-11" > import operating system
+- 
 
 ---
 **sources**:  
@@ -311,4 +347,4 @@ Once we have access to the Deployment Workbench console, we have to:
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
 @22/22 (video 1/2)  
-@10/37 (video 2/2)
+@16/37 (video 2/2)
