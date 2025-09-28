@@ -253,7 +253,7 @@ We can now test PXE boot in different modes by:
 
 ## Installing MDT on Windows Server 2022 to deploy Windows 11
 
-The objective is to combine WDS with MDT to improve our deployment process by adding task sequences to:
+The objective is to combine WDS with MDT to improve our deployment process by adding **task sequences** to:
 - define the client hostname
 - join it to our Active Directory (AD) domain
 - handle partitioning of the client disks
@@ -263,8 +263,18 @@ The objective is to combine WDS with MDT to improve our deployment process by ad
 - execute custom scripts for various purposes
 - etc.
 
-With MDT, we'll be doing "**Lite Touch**" deployment, which means there's a bit of human intervention.  
+With MDT, we'll be doing "**Lite Touch**" deployment, which implies a bit of human intervention.  
+For a **zero-touch** deployment approach, we should use SCCM (now known as "Microsoft Configuration Manager").  
 
+Once we have deployed our MDT server, we'll use the "**Deployment Workbench**" console to manage applications, images, drivers...  
+
+### Prerequisites
+
+To deploy our MDT server, we need to make sure we already have:
+- a WDS server
+- a DHCP server configured to handle PXE boot for both BIOS and UEFI clients
+- an AD domain controller (optional)
+- client machines ready to receive Windows images
 
 ---
 **sources**:  
@@ -274,4 +284,4 @@ With MDT, we'll be doing "**Lite Touch**" deployment, which means there's a bit 
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
 @22/22 (video 1/2)  
-@2/37 (video 2/2)
+@4/37 (video 2/2)
