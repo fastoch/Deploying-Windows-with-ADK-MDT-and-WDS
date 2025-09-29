@@ -367,7 +367,16 @@ We also need to uncheck the x86 option in the deployment share's properties:
 
 which makes sense since W11 only supports 64-bit.  
 
-Now, if we try and return in the Windows PE tab, the issue should be fixed.  
+And now, if we try and return in the Windows PE tab, the issue should be fixed.  
+
+---
+
+For other MDT known issues, report to the official Microsoft documentation:  
+https://learn.microsoft.com/en-us/intune/configmgr/mdt/known-issues?WT.mc_id=AZ-MVP-5004580
+
+---
+
+### Customizing the MDT environment
 
 
 
@@ -379,4 +388,4 @@ Now, if we try and return in the Windows PE tab, the issue should be fixed.
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
 @22/22 (video 1/2)  
-@23/37 (video 2/2)
+@24/37 (video 2/2)
