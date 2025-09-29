@@ -348,6 +348,29 @@ Set-Acl $MDTSharePath $Acl
 - right-click on that folder > create a new task sequence
 - follow the wizard (cf. sources at the end of this document)
 
+### Configuring a task sequence
+
+Once the task sequence has been created, we can go to its properties.   
+We can then modify the order of the different deployment steps, or disable some steps and enable some others.  
+
+### Known issues - configuring MDT for deploying W11
+
+If we try and go to the properties of our deployment share (while using the Deployment Workbench console), and then 
+click on the Windows PE tab, this will make the console crash...  
+
+To solve that, we need to run the following command in powershell to create an empty folder at that location:
+```
+mkdir "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Windows Preinstallation Environment\x86\WinPE_OCs"
+```
+We also need to uncheck the x86 option in the deployment share's properties:  
+<img width="428" height="398" alt="image" src="https://github.com/user-attachments/assets/0be54abc-3016-4029-b272-2f95ab8ad0cc" />
+
+which makes sense since W11 only supports 64-bit.  
+
+Now, if we try and return in the Windows PE tab, the issue should be fixed.  
+
+
+
 ---
 **sources**:  
 - video #1: https://youtu.be/ILon8Quv924?si=NWygllLZPJ2hJXi4
@@ -356,4 +379,4 @@ Set-Acl $MDTSharePath $Acl
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
 @22/22 (video 1/2)  
-@19/37 (video 2/2)
+@23/37 (video 2/2)
