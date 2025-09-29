@@ -333,11 +333,19 @@ Set-Acl $MDTSharePath $Acl
 
 ### Importing a W11 image into our MDT
 
-- download the desired ISO image of W11
+- download the desired ISO image(s) of W11
 - in the Deployment Workbench console, go to the newly created deployment share
 - right-click on "operating systems" to create a "Windows-11" folder into which we'll be able to import all our W11 images
 - then, right-click on "Windows-11" > import operating system
-- 
+- follow the wizard
+- once the import is over, select which versions of W11 we want to keep (Education, Pro, Enterprise, etc.) and delete the ones we don't need
+
+### Creating a task sequence
+
+- In the deployment share we've created inside the Deployment Workbench console:
+- right-click on "Task Sequences" to create a "Windows-11" folder
+- right-click on that folder > create a new task sequence
+- follow the wizard
 
 ---
 **sources**:  
@@ -347,4 +355,4 @@ Set-Acl $MDTSharePath $Acl
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
 
 @22/22 (video 1/2)  
-@16/37 (video 2/2)
+@19/37 (video 2/2)
