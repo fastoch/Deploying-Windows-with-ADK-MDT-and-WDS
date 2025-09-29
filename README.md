@@ -308,6 +308,7 @@ Once we have access to the Deployment Workbench console, we have to:
 
 For now, we don't have any deployment shares.  
 - create one by right-clicking the "Deployment Shares" folder in the left pane > new deployment share
+- follow the wizard (cf. sources at the end of this document)
 - we can store data for this deployment share in the same partition that we used for WDS (W:\DeploymentShare)
 - once our deployment share has been created, we can create a new local user on the server with read-only permission on the deployment share folder
 
@@ -337,7 +338,7 @@ Set-Acl $MDTSharePath $Acl
 - in the Deployment Workbench console, go to the newly created deployment share
 - right-click on "operating systems" to create a "Windows-11" folder into which we'll be able to import all our W11 images
 - then, right-click on "Windows-11" > import operating system
-- follow the wizard
+- follow the wizard (cf. sources at the end of this document)
 - once the import is over, select which versions of W11 we want to keep (Education, Pro, Enterprise, etc.) and delete the ones we don't need
 
 ### Creating a task sequence
@@ -345,7 +346,7 @@ Set-Acl $MDTSharePath $Acl
 - In the deployment share we've created inside the Deployment Workbench console:
 - right-click on "Task Sequences" to create a "Windows-11" folder
 - right-click on that folder > create a new task sequence
-- follow the wizard
+- follow the wizard (cf. sources at the end of this document)
 
 ---
 **sources**:  
