@@ -367,7 +367,7 @@ We also need to uncheck the x86 option in the deployment share's properties:
 
 which makes sense since W11 only supports 64-bit.  
 
-And now, if we try and return in the Windows PE tab, the issue should be fixed.  
+And now, if we go back to the properties of our deployment share and click the Windows PE tab, the console will no longer crash.  
 
 ---
 
@@ -378,7 +378,12 @@ https://learn.microsoft.com/en-us/intune/configmgr/mdt/known-issues?WT.mc_id=AZ-
 
 ### Customizing the MDT environment
 
+2 config files:
+- CustomSettings.ini
+- Bootstrap.ini
 
+To edit the CustomSettings.ini file, open the deployment share properties and click the "Rules" tab.  
+From there, we can also click a button to edit the Bootstrap.ini file.
 
 ---
 **sources**:  
@@ -386,6 +391,9 @@ https://learn.microsoft.com/en-us/intune/configmgr/mdt/known-issues?WT.mc_id=AZ-
 - tuto #1: https://www.it-connect.fr/serveurs-dhcp-wds-boot-pxe-bios-et-uefi/
 - video #2: https://youtu.be/bx374BP8I6A?si=IxrKPmQkhy1Bw3Qg
 - tuto #2: https://www.it-connect.fr/installer-mdt-sur-windows-server-2022-pour-deployer-windows-11-22h2/
+- video #3: https://www.youtube.com/watch?v=nulOMSBY_Rs
+- tuto #3: https://www.it-connect.fr/deploiement-avec-mdt-integrer-les-machines-au-domaine-active-directory/
 
-@22/22 (video 1/2)  
-@24/37 (video 2/2)
+@22/22 (video 1/3)  
+@25/37 (video 2/3)
+@0/10 (video 3/3)
